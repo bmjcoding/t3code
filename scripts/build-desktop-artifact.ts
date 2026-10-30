@@ -359,6 +359,7 @@ const MAC_DESKTOP_BUILD_PREREQUISITES = [
   { id: "make", description: "Xcode Command Line Tools (make)" },
   { id: "sips", description: "macOS image tool (sips)" },
   { id: "iconutil", description: "macOS icon tool (iconutil)" },
+  { id: "actool", description: "Xcode 26+ asset catalog compiler (actool) for Liquid Glass icons" },
   { id: "lipo", description: "Xcode universal-binary tool (lipo)" },
 ] as const;
 
@@ -381,6 +382,11 @@ export class MacDesktopBuildPrerequisitesMissingError extends Schema.TaggedError
       "",
       "Install Apple's build tools with:",
       "  xcode-select --install",
+      ...(this.missing.includes("actool")
+        ? [
+            "Liquid Glass icons also require full Xcode 26+; Command Line Tools alone are insufficient.",
+          ]
+        : []),
       "Install Rust from https://rustup.rs, then add the requested target(s):",
       `  rustup target add ${this.rustTargets.join(" ")}`,
       "",
@@ -1780,6 +1786,7 @@ export const preflightMacDesktopBuild = Effect.fn("preflightMacDesktopBuild")(fu
         ChildProcess.make("xcrun", ["--find", "iconutil"]),
         "iconutil",
       ),
+      actool: desktopBuildProbeSucceeds(ChildProcess.make("xcrun", ["--find", "actool"]), "actool"),
       lipo:
         arch === "universal"
           ? desktopBuildProbeSucceeds(ChildProcess.make("lipo", ["-version"]), "lipo")
@@ -2583,14 +2590,14 @@ export function resolveDesktopWebAssetBrand(version: string): WebAssetBrand {
 export function resolveDesktopBuildIconAssets(version: string): DesktopBuildIconAssets {
   if (resolveDesktopUpdateChannel(version) === "nightly") {
     return {
-      macIconPng: BRAND_ASSET_PATHS.nightlyMacIconPng,
+      macIconPng: BRAND_ASSET_PATHS.devSpaceMacIconPng,
       linuxIconPng: BRAND_ASSET_PATHS.nightlyLinuxIconPng,
       windowsIconIco: BRAND_ASSET_PATHS.nightlyWindowsIconIco,
     };
   }
 
   return {
-    macIconPng: BRAND_ASSET_PATHS.productionMacIconPng,
+    macIconPng: BRAND_ASSET_PATHS.devSpaceMacIconPng,
     linuxIconPng: BRAND_ASSET_PATHS.productionLinuxIconPng,
     windowsIconIco: BRAND_ASSET_PATHS.productionWindowsIconIco,
   };
@@ -2688,7 +2695,9 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
     const repoRoot = yield* RepoRoot;
     buildConfig.mac = {
       target: target === "dmg" ? [target, "zip"] : [target],
-      icon: "icon.icns",
+      // electron-builder compiles the layered source into Assets.car and
+      // generates the legacy ICNS. A PNG here loses appearance switching.
+      icon: path.join(repoRoot, BRAND_ASSET_PATHS.devSpaceMacIconComposerProject),
       category: "public.app-category.developer-tools",
       extendInfo: {
         NSScreenCaptureUsageDescription:
@@ -2712,6 +2721,7 @@ export const createBuildConfig = Effect.fn("createBuildConfig")(function* (
 
   if (platform === "mac" && target === "dmg") {
     buildConfig.dmg = {
+      icon: "icon.icns",
       // Give the themed installer its own Finder volume name. Finder caches
       // DMG window backgrounds by volume name, so reusing a generic name can
       // make a newly built background look unchanged during testing.

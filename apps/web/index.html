@@ -437,20 +437,759 @@
         color: var(--boot-foreground);
       }
 
-      #boot-shell-card {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 96px;
-        height: 96px;
+      /* DevSpace Pro galaxy splash. Pure CSS, so it animates before any JS runs;
+         React's first commit (or showBootError) removes the whole tree. It must stay
+         compositor-only so it never competes with the bundle for the main thread:
+         animate transform/opacity on HTML boxes (an <svg> may animate opacity only),
+         never filter, and never two animations of one property on one element.
+         Every loop is finite: it all settles by ~12s, so a slow boot never keeps the
+         GPU busy. Star coordinates are generated data. */
+      #boot-shell {
+        --gx-bg: var(--boot-background, #ffffff);
+        --gx-fg: var(--boot-foreground, #262626);
+        --gx-accent: var(--boot-accent, #4f46e5);
+        --gx-k: 0.5;
       }
 
-      #boot-shell-logo {
-        width: 64px;
-        height: 64px;
-        object-fit: contain;
+      html.dark #boot-shell {
+        --gx-bg: var(--boot-background, #0a0a0a);
+        --gx-fg: var(--boot-foreground, #f5f5f5);
+        --gx-accent: var(--boot-accent, #818cf8);
+        --gx-k: 1;
+      }
+
+      .gx {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        contain: strict;
+        pointer-events: none;
+      }
+
+      .gx svg {
+        display: block;
+        overflow: visible;
+      }
+
+      @keyframes gx-twinkle {
+        50% {
+          opacity: 0.12;
+        }
+      }
+
+      /* Nebula, core glow and star field warp in as one layer. */
+      .gx-back {
+        position: absolute;
+        inset: 0;
+        animation: gx-back-in 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      @keyframes gx-back-in {
+        from {
+          opacity: 0;
+          transform: scale(0.22);
+        }
+      }
+
+      .gx-back i {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        border-radius: 50%;
+      }
+
+      .gx-n1 {
+        width: 780px;
+        height: 430px;
+        margin: -215px 0 0 -390px;
+        translate: -150px -50px;
+        rotate: -12deg;
+        background: radial-gradient(
+          closest-side,
+          color-mix(in oklab, var(--gx-accent) calc(32% * var(--gx-k)), transparent),
+          transparent
+        );
+      }
+
+      .gx-n2 {
+        width: 640px;
+        height: 370px;
+        margin: -185px 0 0 -320px;
+        translate: 195px 65px;
+        background: radial-gradient(
+          closest-side,
+          oklch(from var(--gx-accent) l c calc(h + 70) / calc(0.26 * var(--gx-k))),
+          transparent
+        );
+      }
+
+      .gx-n3 {
+        width: 1200px;
+        height: 280px;
+        margin: -140px 0 0 -600px;
+        rotate: -11deg;
+        background: radial-gradient(
+          closest-side,
+          oklch(
+            from var(--gx-accent) calc(l + 0.1) calc(c * 0.6) calc(h - 45) /
+              calc(0.16 * var(--gx-k))
+          ),
+          transparent
+        );
+      }
+
+      .gx-bulge {
+        width: 320px;
+        height: 320px;
+        margin: -160px;
+        background: radial-gradient(
+          closest-side,
+          color-mix(in oklab, var(--gx-accent) calc(28% * var(--gx-k)), transparent),
+          transparent
+        );
+      }
+
+      /* Stars are zero-length round-capped subpaths. */
+      .gx-sky {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        fill: none;
+        stroke: var(--gx-fg);
+        stroke-linecap: round;
+        stroke-width: 2.5;
+        opacity: calc(0.35 + 0.65 * var(--gx-k));
+      }
+
+      .gx-sky path {
+        vector-effect: non-scaling-stroke;
+      }
+
+      .gx-s1 {
+        stroke-width: 1.3;
+        stroke-opacity: 0.6;
+      }
+
+      .gx-s2 {
+        stroke-width: 1.9;
+        stroke-opacity: 0.85;
+      }
+
+      .gx-t1 {
+        animation: gx-twinkle 3.1s ease-in-out 3;
+      }
+
+      .gx-t2 {
+        animation: gx-twinkle 4.3s ease-in-out 1.2s 2;
+      }
+
+      .gx-t3 {
+        stroke: var(--gx-accent);
+        animation: gx-twinkle 3.7s ease-in-out 2s 2;
+      }
+
+      /* Flare stars and shooting stars. */
+      .gx-fx {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        opacity: calc(0.45 + 0.55 * var(--gx-k));
+      }
+
+      .gx-fx i {
+        position: absolute;
+        opacity: 0;
+      }
+
+      .gx-spark {
+        width: 26px;
+        height: 26px;
+        margin: -13px;
+        background:
+          radial-gradient(
+            circle,
+            var(--gx-fg) 1.2px,
+            color-mix(in oklab, var(--gx-accent) 60%, transparent) 2px,
+            transparent 6px
+          ),
+          linear-gradient(90deg, transparent, var(--gx-fg), transparent) center / 100% 1px no-repeat,
+          linear-gradient(transparent, var(--gx-fg), transparent) center / 1px 100% no-repeat;
+        translate: -36vw -27vh;
+        animation: gx-spark 4.6s ease-in-out 1.2s 2 both;
+      }
+
+      .gx-spark:nth-child(2) {
+        translate: 33vw -22vh;
+        animation-delay: 2.1s;
+      }
+
+      .gx-spark:nth-child(3) {
+        translate: -24vw 31vh;
+        animation-delay: 1.7s;
+      }
+
+      .gx-spark:nth-child(4) {
+        translate: 39vw 26vh;
+        animation-delay: 2.6s;
+      }
+
+      @keyframes gx-spark {
+        0%,
+        100% {
+          opacity: 0;
+          transform: scale(0.2) rotate(0deg);
+        }
+        50% {
+          opacity: 0.9;
+          transform: scale(1) rotate(45deg);
+        }
+      }
+
+      .gx-shoot {
+        width: 190px;
+        height: 1.5px;
+        margin: -0.75px 0 0 -190px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, transparent, var(--gx-fg));
+        transform-origin: 100% 50%;
+        translate: -40vw -34vh;
+        rotate: 21deg;
+        animation: gx-shoot 0.9s cubic-bezier(0.3, 0, 0.7, 1) 1.6s both;
+      }
+
+      .gx-shoot:nth-child(6) {
+        translate: 14vw -40vh;
+        rotate: 24deg;
+        animation-delay: 5.4s;
+      }
+
+      @keyframes gx-shoot {
+        0% {
+          opacity: 0;
+          transform: translateX(0) scaleX(0.1);
+        }
+        15% {
+          opacity: 0.9;
+        }
+        100% {
+          opacity: 0;
+          transform: translateX(400px) scaleX(1);
+        }
+      }
+
+      /* Spiral galaxy on a tilted plane: swirls in, turns, then eases to a stop. */
+      .gx-disk {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: rotate(-12deg) scaleY(0.36);
+      }
+
+      .gx-spin {
+        position: absolute;
+        animation: gx-swirl 10s 0.2s both;
+      }
+
+      .gx-spin > * {
+        position: absolute;
+      }
+
+      /* The two segments meet at the same angular speed, so the swirl flows into
+         the slow turn without a hitch. */
+      @keyframes gx-swirl {
+        0% {
+          opacity: 0;
+          transform: rotate(-160deg) scale(0.3);
+          animation-timing-function: cubic-bezier(0.2, 0.9, 0.4, 0.95);
+        }
+        8% {
+          opacity: 1;
+        }
+        21% {
+          transform: rotate(0deg) scale(1);
+          animation-timing-function: cubic-bezier(0.3, 0.375, 0.55, 1);
+        }
+        100% {
+          opacity: 1;
+          transform: rotate(40deg) scale(1);
+        }
+      }
+
+      .gx-core {
+        width: 380px;
+        height: 380px;
+        margin: -190px;
+        border-radius: 50%;
+        background: radial-gradient(
+          closest-side,
+          color-mix(
+            in oklab,
+            color-mix(in oklab, var(--gx-fg) 55%, var(--gx-accent)) calc(75% * var(--gx-k)),
+            transparent
+          ),
+          color-mix(in oklab, var(--gx-accent) calc(38% * var(--gx-k)), transparent) 28%,
+          transparent
+        );
+      }
+
+      .gx-haze {
+        --gx-haze:
+          130px 193px 24px 9px, 71px -100px 24px 9px, -279px -179px 24px 9px, -12px -192px 24px 9px,
+          -410px 12px 24px 9px, -73px 87px 24px 9px, -234px -203px 24px 9px, -64px -191px 24px 9px,
+          71px -109px 24px 9px, 63px -122px 24px 9px, -80px 65px 24px 9px, 61px -127px 24px 9px,
+          205px 217px 24px 9px, -21px 173px 24px 9px, -78px 77px 24px 9px, 60px -113px 24px 9px,
+          -154px -199px 24px 9px, 353px 81px 24px 9px, -64px 106px 24px 9px, 53px -126px 24px 9px,
+          -52px -197px 24px 9px, 20px -156px 24px 9px, -41px 155px 24px 9px, -155px -192px 24px 9px,
+          -24px -183px 24px 9px, 301px 182px 24px 9px, 25px -166px 24px 9px, -401px -75px 24px 9px,
+          -79px 94px 24px 9px, 142px 217px 24px 9px, -42px 150px 24px 9px, -2px -186px 24px 9px,
+          -12px -189px 24px 9px, 213px 205px 24px 9px, -34px 141px 24px 9px, 428px -12px 24px 9px,
+          128px 226px 24px 9px, -208px -217px 24px 9px, -49px 128px 24px 9px, 356px 99px 24px 9px,
+          -81px 67px 24px 9px, -77px 21px 24px 9px, -34px -203px 24px 9px, 80px -48px 24px 9px,
+          -189px -193px 24px 9px, -34px 154px 24px 9px, -314px -151px 24px 9px, 28px 190px 24px 9px,
+          184px 200px 24px 9px, -300px -131px 24px 9px;
+        width: 2px;
+        height: 2px;
+        margin: -1px;
+        border-radius: 50%;
+        color: color-mix(in oklab, var(--gx-accent) calc(30% * var(--gx-k)), transparent);
+        box-shadow: var(--gx-haze);
+      }
+
+      .gx-arms {
+        width: 1040px;
+        height: 1040px;
+        margin: -520px;
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      .gx-a1 {
+        stroke: var(--gx-fg);
+        stroke-width: 2.5;
+        stroke-opacity: 0.9;
+      }
+
+      .gx-a2 {
+        stroke: color-mix(in oklab, var(--gx-accent) 70%, var(--gx-fg));
+        stroke-width: 3.2;
+      }
+
+      .gx-a3 {
+        stroke: var(--gx-fg);
+        stroke-width: 1.8;
+        stroke-opacity: 0.45;
+      }
+
+      /* Hyperspace drop-out: 6 groups of 8 streaks, 45deg apart within a group. */
+      .gx-warp,
+      .gx-warp b,
+      .gx-warp i {
+        position: absolute;
+      }
+
+      .gx-warp {
+        top: 50%;
+        left: 50%;
+      }
+
+      .gx-warp b:nth-child(2) {
+        rotate: 7deg;
+      }
+
+      .gx-warp b:nth-child(3) {
+        rotate: 15deg;
+      }
+
+      .gx-warp b:nth-child(4) {
+        rotate: 22deg;
+      }
+
+      .gx-warp b:nth-child(5) {
+        rotate: 30deg;
+      }
+
+      .gx-warp b:nth-child(6) {
+        rotate: 38deg;
+      }
+
+      .gx-warp i {
+        top: -1px;
+        width: 220px;
+        height: 2px;
+        border-radius: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          color-mix(in oklab, var(--gx-fg) calc(80% * var(--gx-k)), transparent)
+        );
+        transform-origin: 0 50%;
+        opacity: 0;
+        animation: gx-streak 0.8s cubic-bezier(0.35, 0, 0.75, 0.55) both;
+      }
+
+      .gx-warp i:nth-child(2) {
+        rotate: 45deg;
+      }
+
+      .gx-warp i:nth-child(3) {
+        rotate: 90deg;
+      }
+
+      .gx-warp i:nth-child(4) {
+        rotate: 135deg;
+      }
+
+      .gx-warp i:nth-child(5) {
+        rotate: 180deg;
+      }
+
+      .gx-warp i:nth-child(6) {
+        rotate: 225deg;
+      }
+
+      .gx-warp i:nth-child(7) {
+        rotate: 270deg;
+      }
+
+      .gx-warp i:nth-child(8) {
+        rotate: 315deg;
+      }
+
+      .gx-warp i:nth-child(4n + 2) {
+        background: linear-gradient(90deg, transparent, var(--gx-accent));
+      }
+
+      .gx-warp i:nth-child(3n) {
+        width: 130px;
+        animation-duration: 0.95s;
+      }
+
+      .gx-warp b:nth-child(odd) i {
+        animation-delay: 60ms;
+      }
+
+      @keyframes gx-streak {
+        0% {
+          opacity: 0;
+          transform: translateX(40px) scaleX(0.15);
+        }
+        25% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translateX(900px) scaleX(1.3);
+        }
+      }
+
+      /* Logo and orbit. The ring is drawn twice, the half behind the letters and
+         the half in front. The satellite rides a radius-176 circle in a plane
+         squashed to the ring's 28/176 aspect, so it stays exactly on the ring;
+         each dot counter-rotates and un-squashes to stay round, and grows in front. */
+      .gx-center {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 380px;
+        height: 220px;
+      }
+
+      /* The mark flies in from depth: the wrapper scales while a pre-blurred copy
+         cross-fades into the sharp one (blur is rasterised once, never animated). */
+      .gx-mark {
+        position: relative;
+        z-index: 1;
+        width: 142px;
+        color: var(--gx-fg);
+        animation: gx-mark-in 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      .gx-mark svg {
+        width: 100%;
+      }
+
+      .gx-mark-blur {
+        position: absolute;
+        inset: 0;
+        fill: currentColor;
+        opacity: 0;
+        animation: gx-mark-blur 1s ease-out both;
+      }
+
+      .gx-mark-ink {
+        fill: none;
+        stroke: var(--gx-bg);
+        stroke-linejoin: round;
+        animation: gx-mark-ink 1s ease-out both;
+      }
+
+      /* A soft background-coloured halo keeps the letters crisp over the bright
+         core. The blur is an SVG filter, rasterised once, not a per-frame effect. */
+      .gx-glow {
+        stroke-width: 5;
+        stroke-opacity: 0.3;
+        filter: url(#gx-soft);
+      }
+
+      .gx-edge {
+        stroke-width: 1.4;
+        stroke-opacity: 0.55;
+      }
+
+      /* Static translucent layers let the galaxy show through the mark.
+         Only the existing entrance animates; the glass adds no ongoing filters. */
+      .gx-ink {
+        fill: url(#gx-glass-body);
+        stroke: none;
+      }
+
+      .gx-sheen {
+        fill: url(#gx-glass-sheen);
+        stroke: none;
+      }
+
+      .gx-rim {
+        fill: none;
+        stroke: url(#gx-glass-rim);
+        stroke-width: 0.75;
+      }
+
+      @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+        .gx-ink {
+          fill: currentColor;
+        }
+
+        .gx-sheen,
+        .gx-rim {
+          display: none;
+        }
+      }
+
+      @keyframes gx-mark-in {
+        from {
+          transform: scale(1.9);
+        }
+      }
+
+      @keyframes gx-mark-blur {
+        0% {
+          opacity: 0;
+        }
+        25% {
+          opacity: 0.9;
+        }
+        70% {
+          opacity: 0;
+        }
+      }
+
+      @keyframes gx-mark-ink {
+        0%,
+        20% {
+          opacity: 0;
+        }
+        65% {
+          opacity: 1;
+        }
+      }
+
+      .gx-orbit {
+        position: absolute;
+        inset: 0;
+        rotate: -12deg;
+      }
+
+      .gx-behind {
+        clip-path: inset(-60px -60px 50%);
+      }
+
+      .gx-front {
+        z-index: 2;
+        clip-path: inset(50% -60px -60px);
+      }
+
+      .gx-orbit svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        fill: none;
+      }
+
+      .gx-ring {
+        position: absolute;
+        inset: 0;
+        stroke: currentColor;
+        stroke-opacity: 0.22;
+        stroke-width: 1.2;
+        animation: gx-ring-in 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+      }
+
+      .gx-front .gx-ring {
+        stroke-opacity: 0.42;
+      }
+
+      @keyframes gx-ring-in {
+        from {
+          opacity: 0;
+          transform: scale(0.45);
+        }
+      }
+
+      .gx-plane {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: scaleY(0.159091);
+        animation: gx-plane 10s 0.8s both;
+      }
+
+      /* One animation for fade in and out: two opacity animations on one element
+         would force it off the compositor. */
+      @keyframes gx-plane {
+        0% {
+          opacity: 0;
+          animation-timing-function: ease-out;
+        }
+        7%,
+        94% {
+          opacity: 1;
+          animation-timing-function: ease-in;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .gx-plane * {
+        position: absolute;
+      }
+
+      .gx-arm {
+        transform: rotate(40deg);
+        animation: gx-orbit 3.2s linear 0.8s 3 both;
+      }
+
+      @keyframes gx-orbit {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Head plus an 8-dot tail trailing it in 3.5deg steps. */
+      .gx-arm i {
+        width: var(--z);
+        height: var(--z);
+        margin: calc(var(--z) / -2);
+        border-radius: 50%;
+        background: var(--gx-accent);
+        transform: rotate(-40deg) scaleY(6.285714) scale(1.19);
+        animation: gx-counter 3.2s linear 0.8s 3 both;
+      }
+
+      .gx-arm i:nth-child(1) {
+        --z: 3.5px;
+        translate: 155.4px -82.6px;
+        opacity: 0.065;
+      }
+
+      .gx-arm i:nth-child(2) {
+        --z: 4.2px;
+        translate: 160.2px -73px;
+        opacity: 0.115;
+      }
+
+      .gx-arm i:nth-child(3) {
+        --z: 4.9px;
+        translate: 164.3px -63.1px;
+        opacity: 0.172;
+      }
+
+      .gx-arm i:nth-child(4) {
+        --z: 5.6px;
+        translate: 167.9px -52.9px;
+        opacity: 0.235;
+      }
+
+      .gx-arm i:nth-child(5) {
+        --z: 6.3px;
+        translate: 170.8px -42.6px;
+        opacity: 0.303;
+      }
+
+      .gx-arm i:nth-child(6) {
+        --z: 7px;
+        translate: 173.1px -32.1px;
+        opacity: 0.376;
+      }
+
+      .gx-arm i:nth-child(7) {
+        --z: 7.7px;
+        translate: 174.7px -21.4px;
+        opacity: 0.454;
+      }
+
+      .gx-arm i:nth-child(8) {
+        --z: 8.4px;
+        translate: 175.7px -10.7px;
+        opacity: 0.535;
+      }
+
+      .gx-arm i:nth-child(9) {
+        --z: 10px;
+        translate: 176px 0;
+        background: color-mix(in oklab, var(--gx-accent) 55%, white);
+        box-shadow:
+          0 0 8px 2px color-mix(in oklab, var(--gx-accent) 80%, transparent),
+          0 0 26px 7px color-mix(in oklab, var(--gx-accent) 35%, transparent);
+      }
+
+      @keyframes gx-counter {
+        0% {
+          transform: rotate(0deg) scaleY(6.285714) scale(1);
+        }
+        12.5% {
+          transform: rotate(-45deg) scaleY(6.285714) scale(1.21);
+        }
+        25% {
+          transform: rotate(-90deg) scaleY(6.285714) scale(1.3);
+        }
+        37.5% {
+          transform: rotate(-135deg) scaleY(6.285714) scale(1.21);
+        }
+        50% {
+          transform: rotate(-180deg) scaleY(6.285714) scale(1);
+        }
+        62.5% {
+          transform: rotate(-225deg) scaleY(6.285714) scale(0.79);
+        }
+        75% {
+          transform: rotate(-270deg) scaleY(6.285714) scale(0.7);
+        }
+        87.5% {
+          transform: rotate(-315deg) scaleY(6.285714) scale(0.79);
+        }
+        100% {
+          transform: rotate(-360deg) scaleY(6.285714) scale(1);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .gx *,
+        .gx *::before,
+        .gx *::after {
+          animation: none !important;
+        }
+
+        .gx-arm i:not(:last-child) {
+          display: none;
+        }
       }
 
       #boot-error {
@@ -482,8 +1221,161 @@
   <body>
     <div id="root">
       <div id="boot-shell">
-        <div id="boot-shell-card" aria-label="T3 Code splash screen">
-          <img id="boot-shell-logo" src="/apple-touch-icon.png" alt="T3 Code" />
+        <div class="gx" role="img" aria-label="DevSpace Pro">
+          <div class="gx-back">
+            <i class="gx-n3"></i><i class="gx-n1"></i><i class="gx-n2"></i><i class="gx-bulge"></i>
+            <svg class="gx-sky" viewBox="0 0 1600 1000" preserveAspectRatio="none">
+              <path
+                class="gx-s1"
+                d="M1361 538zm39-66zm35-89zm46-6zm74-34zm34 5zm-29-51zm-47 5zm62 126zm21 185zm-182 26zm-49-9zm-44 109zm-32 30zm71 51zm-53 115zm-53 31zm-42-44zm-27 56zm-144 17zm85-160zm19-80zm65-48zm7-53zm-64-76zm-14-8zm53-25zm-2-198zm-41-32zm-55 2zm-13 61zm-77-153zm86-64zm47-26zm12-13zm37 0zm-11-33zm-49-40zm75-44zm99 95zm53 43zm106-9zm113 5zm-343 114zm-198-208zm-19-24zm-6-20zm-74 126zm-109-24zm-126-4zm-81-74zm-68 72zm-73 50zm-41-84zm-31-7zm-58 57zm-45-18zm-44 24zm-58-39zm-62 51zm16 38zm-71-1zm-77-37zm77-70zm21 24zm102 152zm52-24zm30 63zm77-72zm104 119zm16 85zm-50 94zm-19 2zm79 11zm-12 40zm27 68zm18 87zm-13 5zm101 49zm57-5zm14-2zm6 26zm-23-57zm4-56zm165 12zm74 18zm97-76zm-176 252zm-64-32zm-75 6zm-24-6zm-12 75zm31 30zm-84-12zm-47-95zm-187 92zm-106-112zm-3-15zm-44 10zm-6 80zm-51 23zm-19 17zm-18-96zm1-5zm18-92zm6-3zm-71-8zm74-81zm69-5zm2-22zm87 7zm94 18zm-256-96zm-19-23zm-38-3zm-76 36zm187-195zm23 3zm-110-85zm495-106zm101 44zm3 20zm27 25zm-78 68zm-648 543zm13 62zm1388 18zm55 21zm13 8zm62-124z"
+              />
+              <path
+                class="gx-s2"
+                d="M148 68zm-130 134zm83 67zm151 172zm74-47zm52 162zm119-39zm-139 223zm-53 43zm-28-51zm-25-17zm14-52zm-166 121zm11 46zm-92 1zm119 154zm40-20zm54-42zm98 49zm179-65zm310 46zm101-16zm113-125zm55 84zm84-57zm-49-133zm173-61zm47-173zm-141-110zm-73 129zm-118-186zm-2-86zm102-36zm23 26zm0 8zm16-128zm36-34zm-55-32zm110-18zm81 4zm-38 152zm66 28zm4 41zm223-17zm15-190zm-556 62zm-154 222zm-218-67zm-146-26zm-50-161zm460 627zm504 233zm1 39zm81-187zm51 28z"
+              />
+            </svg>
+            <svg class="gx-sky gx-t1" viewBox="0 0 1600 1000" preserveAspectRatio="none">
+              <path
+                d="M826 997zm133-202zm2-44zm-461-85zm-12 88zm-132-9zm-106-85zm67-72zm-143-114zm-132 265zm165 168zm75 51zm1200-75zm71-524zm-15-132zm-75-99z"
+              />
+            </svg>
+            <svg class="gx-sky gx-t2" viewBox="0 0 1600 1000" preserveAspectRatio="none">
+              <path
+                d="M1362 509zm1-17zm100-49zm-132-112zm-36-21zm-84-93zm150-37zm-711 33zm-165-175zm-139 343zm-105 97zm184 63zm-4 172zm125 244zm-454-248zm-43-46z"
+              />
+            </svg>
+            <svg class="gx-sky gx-t3" viewBox="0 0 1600 1000" preserveAspectRatio="none">
+              <path
+                d="M103 821zm16-49zm121 58zm-142 136zm34-433zm11-7zm650 420zm68 8zm174-10zm140-113zm102-38zm292-213z"
+              />
+            </svg>
+          </div>
+          <div class="gx-fx">
+            <i class="gx-spark"></i><i class="gx-spark"></i><i class="gx-spark"></i
+            ><i class="gx-spark"></i> <i class="gx-shoot"></i><i class="gx-shoot"></i>
+          </div>
+          <div class="gx-disk">
+            <div class="gx-spin">
+              <i class="gx-core"></i><i class="gx-haze"></i>
+              <svg class="gx-arms" viewBox="-520 -520 1040 1040">
+                <path
+                  class="gx-a3"
+                  d="M69 -6zm-10 5zm-5 9zm22 0zm-18-27zm-2-33zm-3-4zm5-7zm12 11zm-30-24zm6-16zm5-8zm-17-16zm-1-30zm-19-8zm-8 0zm-44 44zm-32 10zm-57-7zm-25 27zm-33 11zm-11 41zm-11 65zm51 30zm30 36zm-24 13zm-71 21zm56 94zm86 26zm95-68zm24 12zm-44-41zm18-29zm-7-5zm-10-13zm-9 12zm-6-14zm-23-9zm-2-23zm-17-26zm0-4zm-8-4zm-6 6zm13-15zm-21-5zm20-19zm-44-8zm-16 3zm4-48zm16-11zm-47-85zm10-12zm10 3zm8-14zm35 1zm3-51zm21-7zm12 7zm12-4zm-10-10zm-17-93zm-94 89zm-8-4zm-36-9zm-57 10zm4 49zm-18 18zm46 35zm23-27zm33 28zm-13 16zm-95 84zm-34 69zm-56 48zm-32-41zm-43-72zm25-10zm63-102zm103-263zm237-91zm120 20zm22 2zm-31 162zm-28 50zm179-16zm53-96zm83 80zm37 135zm-28 59zm-15 13zm-37 39zm18 26zm-70-25zm12-94zm-130 30zm-19 25zm12 44zm-51-11zm24 70zm-21 29zm25 8zm-1 44zm-6 41zm4 4zm12 3zm10 33zm-80-66zm-40 21zm-89 3zm-29-57zm-179 181zm-22 6zm-16-25zm-21-60zm-45 217zm197 75zm159 62zm175-113zm28 1zm-42-47zm104-235zm44 17zm44-44zm77-1zm-8-86zm15-21zm0-55zm22-38zm84 190zm-314-72z"
+                />
+                <path
+                  class="gx-a1"
+                  d="M-389 231zm-2 13zm-25-57zm19-19zm24-3zm20 1zm1-40zm-19-37zm-19-42zm21-7zm33-4zm10-38zm8-28zm19-16zm4-14zm-5-9zm22-23zm7 1zm12 7zm0 8zm2 12zm2-39zm2-12zm0-5zm15-2zm7-10zm10 1zm18-5zm7-1zm-4 8zm0 7zm-2 2zm5 5zm15-15zm5-4zm5-11zm19 3zm5 7zm11-6zm14-9zm2-9zm5 1zm3-9zm-7-6zm-1-9zm-4 1zm-3 0zm-1-2zm-5 9zm1 5zm0 2zm-7-1zm2 7zm-15-2zm57 4zm7 13zm18-3zm9-17zm-11-6zm-22-5zm48 20zm7 4zm8 6zm7-5zm12 6zm11-6zm10 10zm1 4zm7-1zm9 9zm3-1zm-9 10zm6 9zm7-3zm-1-2zm2 5zm-1 3zm13-1zm-2 15zm0 7zm1 0zm7 2zm8-3zm-4 13zm7 9zm-2 4zm-5-1zm8 8zm1 1zm-5 5zm6 10zm2 11zm-2 4zm-1 5zm-2 8zm1 1zm-4 9zm-4 5zm18 19zm-5-85zm-63-62zm-4-3zm-1-9zm-26 73zm-28 59zm0 1zm-4 6zm0 5zm0 3zm-1 2zm-1 4zm-6 3zm5 4zm-2 2zm-3 3zm-2 4zm5 2zm0 7zm0 1zm-2 1zm5 6zm-5 5zm8 3zm-4 5zm-3 5zm0 11zm5 1zm3 4zm-2 2zm-3 0zm0-1zm6 2zm4 0zm2 2zm0-4zm0 0zm1 8zm-9-1zm7 10zm14 5zm2 3zm4 1zm-1-5zm8 8zm-4 10zm17 5zm3-5zm-9 15zm4 5zm3-1zm7 5zm14-3zm9-3zm14 4zm-1 6zm8 1zm8-5zm3 3zm-5 13zm1 3zm-6 2zm-10-5zm-17-1zm26 19zm14-8zm15-6zm8 3zm8-15zm18 1zm7-8zm8-5zm8 8zm4 1zm1-5zm14-5zm12 4zm8 3zm9 0zm-10 25zm-11-4zm44-2zm8-6zm21-25zm-10-9zm-13-10zm5-8zm18-7zm5 16zm17 5zm1-22zm21 7zm26 2zm-10-35zm11-21zm2-4zm9 4zm-16-15zm-19 3zm16-25zm25-19zm30 10zm3-19zm10-20zm5-16zm-19-7zm-8 12zm0-25zm19-36zm21-17zm-1-30zm-2-23zm-17 1zm5-36zm5-21zm26 10zm1 10zm28-35zm-14-11zm-45-17zm68 115zm-14 45zm16 52zm-42 9zm-12 21zm18 4zm-5 13zm-69 49zm-31-68zm-126 42zm23 113zm-80 50zm-16 73zm-5-1zm-128 14zm-14-113zm0-75zm47 11zm-55-76zm-14 8zm-59 47zm-4 39zm-8 61zm-18-239zm-52-82zm6-7zm-62 40zm-9 10zm5 8zm-89 95zm-16 9zm-6 7zm-18-2zm-20 64zm1 21zm-12 21zm32 15zm45 197zm644-157zm-52-338zm-71-176z"
+                />
+                <path
+                  class="gx-a2"
+                  d="M293 73zm-10-1zm-12 3zm-11 11zm-6 5zm-1 7zm15-1zm1 2zm-12 21zm-18-8zm-8 19zm-38 2zm-2 5zm-25 11zm3 7zm-14 1zm-22 11zm-4-8zm-24 1zm-23-3zm-17 8zm-26-7zm-2 0zm-16-4zm-3-2zm0-9zm10 1zm-33-7zm-4-1zm-2-2zm3-1zm-7-5zm-7-3zm-17-26zm0 0zm-3-1zm-19-34zm2-2zm-5-5zm-1-4zm0-31zm1-4zm3-8zm117-10zm3-6zm3-10zm1-6zm0-19zm1-4zm-1-13zm-4-11zm-4-11zm-3-6zm0-5zm-9-11zm-6-2zm-4-9zm-5-7zm0-2zm-17-5zm-20-19zm-2-3zm-2 8zm-12-12zm-10 1zm-6-7zm-12-7zm-36 7zm-1-7zm-11 8zm-23-13zm-5 3zm-8-2zm-3 8zm-11-3zm10 15zm11-5zm-77 9zm-7 3zm-2 11zm-20-2zm-23 29zm-16 9zm-20 31zm-44 54zm-6 27zm-20 15zm-20 38zm-15 20zm13 12zm-25 27zm-9 15zm22 36zm8 114zm686-198zm0-42zm13-24zm26 10zm-7 18zm44-71zm9-3zm-13-10zm30-29zm-8-10zm-2 1zm24-47zm5 0zm3-24zm-30-18zm-4-9z"
+                />
+              </svg>
+            </div>
+          </div>
+          <div class="gx-warp">
+            <b><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></b
+            ><b><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></b
+            ><b><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></b
+            ><b><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></b
+            ><b><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></b
+            ><b><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></b>
+          </div>
+          <div class="gx-center">
+            <div class="gx-orbit gx-behind">
+              <div class="gx-ring">
+                <svg viewBox="0 0 380 220"><ellipse cx="190" cy="110" rx="176" ry="28" /></svg>
+              </div>
+              <div class="gx-plane">
+                <div class="gx-arm">
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                </div>
+              </div>
+            </div>
+            <div class="gx-mark">
+              <svg class="gx-mark-blur" viewBox="12 31 110 66">
+                <filter id="gx-blur" x="-40%" y="-60%" width="180%" height="220%">
+                  <feGaussianBlur stdDeviation="9" />
+                </filter>
+                <use href="#gx-ds" filter="url(#gx-blur)" />
+              </svg>
+              <svg class="gx-mark-ink" viewBox="12 31 110 66">
+                <defs>
+                  <filter id="gx-soft" x="-30%" y="-40%" width="160%" height="180%">
+                    <feGaussianBlur stdDeviation="3.5" />
+                  </filter>
+                  <!-- Foreground-colored glass adapts to light, dark, and custom themes. -->
+                  <linearGradient
+                    id="gx-glass-body"
+                    x1="0"
+                    y1="35"
+                    x2="0"
+                    y2="94"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stop-color="currentColor" stop-opacity="0.8" />
+                    <stop offset="0.38" stop-color="currentColor" stop-opacity="0.38" />
+                    <stop offset="0.55" stop-color="currentColor" stop-opacity="0.2" />
+                    <stop offset="1" stop-color="currentColor" stop-opacity="0.58" />
+                  </linearGradient>
+                  <linearGradient
+                    id="gx-glass-sheen"
+                    x1="24"
+                    y1="35"
+                    x2="93"
+                    y2="100"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stop-color="white" stop-opacity="0.02" />
+                    <stop offset="0.28" stop-color="white" stop-opacity="0.3" />
+                    <stop offset="0.5" stop-color="white" stop-opacity="0.015" />
+                    <stop offset="1" stop-color="white" stop-opacity="0.07" />
+                  </linearGradient>
+                  <linearGradient
+                    id="gx-glass-rim"
+                    x1="0"
+                    y1="35"
+                    x2="0"
+                    y2="94"
+                    gradientUnits="userSpaceOnUse"
+                  >
+                    <stop stop-color="currentColor" stop-opacity="0.95" />
+                    <stop offset="0.48" stop-color="currentColor" stop-opacity="0.16" />
+                    <stop offset="1" stop-color="currentColor" stop-opacity="0.65" />
+                  </linearGradient>
+                  <g id="gx-ds">
+                    <path
+                      id="gx-d"
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M16 36h21c18 0 29 11 29 28S55 92 37 92H16V36Zm13 11v34h8c10 0 16-6 16-17s-6-17-16-17h-8Z"
+                    />
+                    <path
+                      id="gx-s"
+                      transform="translate(4 0)"
+                      d="m112 41-5 10c-5-3-10-5-16-5-6 0-10 2-10 6 0 4 4 5 12 7 13 3 21 7 21 17 0 11-9 18-24 18-9 0-18-3-24-7l5-10c5 4 12 6 19 6 7 0 11-2 11-6 0-4-4-5-12-7-13-3-21-7-21-17 0-11 9-18 23-18 8 0 15 2 21 6Z"
+                    />
+                  </g>
+                </defs>
+                <use class="gx-glow" href="#gx-ds" />
+                <use class="gx-edge" href="#gx-ds" />
+                <use class="gx-ink" href="#gx-ds" />
+                <use class="gx-sheen" href="#gx-ds" />
+                <use class="gx-rim" href="#gx-ds" />
+              </svg>
+            </div>
+            <!-- The front arc overlays the translucent letters without a solid knockout. -->
+            <div class="gx-orbit gx-front">
+              <div class="gx-ring">
+                <svg viewBox="0 0 380 220"><ellipse cx="190" cy="110" rx="176" ry="28" /></svg>
+              </div>
+              <div class="gx-plane">
+                <div class="gx-arm">
+                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

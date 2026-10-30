@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none">
+  <title>DS — DevSpace Pro</title>
+  <path fill="white" fill-rule="evenodd" d="M16 36h21c18 0 29 11 29 28S55 92 37 92H16V36Zm13 11v34h8c10 0 16-6 16-17s-6-17-16-17h-8Z"/>
+  <path fill="white" d="m112 41-5 10c-5-3-10-5-16-5-6 0-10 2-10 6 0 4 4 5 12 7 13 3 21 7 21 17 0 11-9 18-24 18-9 0-18-3-24-7l5-10c5 4 12 6 19 6 7 0 11-2 11-6 0-4-4-5-12-7-13-3-21-7-21-17 0-11 9-18 23-18 8 0 15 2 21 6Z"/>
+</svg>

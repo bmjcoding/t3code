@@ -64,12 +64,10 @@ const resolveResourcePath = Effect.fn("desktop.assets.resolveResourcePath")(func
 const sourceTreeIconFileNames = {
   dev: {
     ico: "blueprint-windows.ico",
-    macPng: "blueprint-macos-1024.png",
     universalPng: "blueprint-universal-1024.png",
   },
   prod: {
     ico: "t3-black-windows.ico",
-    macPng: "black-macos-1024.png",
     universalPng: "black-universal-1024.png",
   },
 } as const;
@@ -79,14 +77,12 @@ function resolveSourceTreeIconPath(
   ext: keyof DesktopIconPaths,
 ): string | undefined {
   if (environment.isPackaged || ext === "icns") return undefined;
+  if (environment.platform === "darwin" && ext === "png") {
+    return environment.path.join(environment.rootDir, "assets", "dspro", "dspro-macos-1024.png");
+  }
   const brand = environment.isDevelopment ? "dev" : "prod";
   const fileNames = sourceTreeIconFileNames[brand];
-  const fileName =
-    ext === "ico"
-      ? fileNames.ico
-      : environment.platform === "darwin"
-        ? fileNames.macPng
-        : fileNames.universalPng;
+  const fileName = ext === "ico" ? fileNames.ico : fileNames.universalPng;
   return environment.path.join(environment.rootDir, "assets", brand, fileName);
 }
 

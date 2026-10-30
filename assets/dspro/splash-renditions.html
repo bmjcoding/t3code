@@ -1,0 +1,1372 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DS Pro Startup Renditions</title>
+    <style>
+      /* ================================================================
+         Preview page chrome
+         ================================================================ */
+      :root {
+        color-scheme: dark;
+        --page: #0b0b0c;
+        --card: #131315;
+        --line: #232327;
+        --text: #ececee;
+        --muted: #8e8e95;
+        --chip: #1a1a1d;
+        --chip-on: #26262b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--text);
+        font:
+          14px/1.5 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          system-ui,
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      header,
+      .controls-inner,
+      main.grid {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+      header {
+        padding-top: 40px;
+        padding-bottom: 20px;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: 22px;
+        letter-spacing: -0.01em;
+      }
+      .lede {
+        margin: 0;
+        max-width: 78ch;
+        color: var(--muted);
+      }
+      code {
+        font:
+          12.5px ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+        color: #c9c9d1;
+      }
+      .controls {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        background: color-mix(in oklab, var(--page) 86%, transparent);
+        backdrop-filter: blur(12px);
+      }
+      .controls-inner {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 22px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+      .group {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+      .label {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .chip,
+      .btn,
+      select {
+        appearance: none;
+        border: 1px solid var(--line);
+        background: var(--chip);
+        color: var(--text);
+        font: inherit;
+        font-size: 12.5px;
+        border-radius: 999px;
+        cursor: pointer;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 4px 11px 4px 6px;
+      }
+      .chip[aria-pressed="true"] {
+        border-color: #5c5c66;
+        background: var(--chip-on);
+      }
+      .sw {
+        position: relative;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--sw-bg);
+        box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+      }
+      .sw::after {
+        content: "";
+        position: absolute;
+        right: 1px;
+        bottom: 1px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--sw-accent);
+      }
+      .btn {
+        padding: 5px 12px;
+      }
+      .btn:hover,
+      .chip:hover {
+        border-color: #4a4a52;
+      }
+      .btn:focus-visible,
+      .chip:focus-visible,
+      select:focus-visible {
+        outline: 2px solid #818cf8;
+        outline-offset: 2px;
+      }
+      select {
+        padding: 5px 28px 5px 12px;
+        background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+          linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+        background-position:
+          calc(100% - 15px) 55%,
+          calc(100% - 10px) 55%;
+        background-size: 5px 5px;
+        background-repeat: no-repeat;
+      }
+      .toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12.5px;
+        cursor: pointer;
+      }
+      .toggle input {
+        accent-color: #818cf8;
+      }
+
+      main.grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+        padding-top: 24px;
+        padding-bottom: 56px;
+      }
+      @media (max-width: 900px) {
+        main.grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      @media (max-width: 560px) {
+        header,
+        .controls-inner,
+        main.grid {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+      }
+      .card {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--card);
+      }
+      .card-body {
+        display: grid;
+        gap: 6px;
+        padding: 14px 16px 16px;
+      }
+      .card-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px 12px;
+      }
+      .card h2 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      .num {
+        margin-right: 8px;
+        color: var(--muted);
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .meta {
+        color: #a3a3ab;
+        font:
+          12px/1.5 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+      }
+      .actions {
+        display: flex;
+        gap: 6px;
+      }
+      .info {
+        padding: 20px 22px;
+      }
+      .info h2 {
+        margin-bottom: 10px;
+      }
+      .info ul {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding-left: 18px;
+        color: var(--muted);
+      }
+      .info li strong {
+        color: var(--text);
+        font-weight: 600;
+      }
+
+      .fs {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        background: #000;
+      }
+      .fs[hidden] {
+        display: none;
+      }
+      .fs-bar {
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        z-index: 60;
+        display: flex;
+        gap: 6px;
+      }
+      .fs-bar .btn {
+        background: rgb(20 20 22 / 0.8);
+        backdrop-filter: blur(8px);
+      }
+
+      /* ================================================================
+         Stage: a 1280×800 "app window" scaled into each card, so the
+         mark reads at the same proportion it will in a real window.
+         Theme colours arrive as --ds-bg / --ds-fg / --ds-accent, which
+         index.html would feed from its existing --boot-* variables.
+         ================================================================ */
+      .frame {
+        position: relative;
+        aspect-ratio: 16 / 10;
+        overflow: hidden;
+        border-bottom: 1px solid var(--line);
+        background: var(--ds-bg);
+      }
+      .fs .frame {
+        position: absolute;
+        inset: 0;
+        aspect-ratio: auto;
+        border: 0;
+      }
+      .stage {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: grid;
+        place-items: center;
+        width: 1280px;
+        height: 800px;
+        overflow: hidden;
+        transform-origin: 0 0;
+        transform: scale(var(--s, 1));
+        background: var(--ds-bg);
+        color: var(--ds-fg);
+        font-family:
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          system-ui,
+          sans-serif;
+      }
+      .fs .stage {
+        width: 100%;
+        height: 100%;
+        transform: none;
+      }
+      .stage svg {
+        display: block;
+        overflow: visible;
+        fill: currentColor;
+      }
+      .lights {
+        position: absolute;
+        top: 18px;
+        left: 20px;
+        z-index: 6;
+        display: flex;
+        gap: 8px;
+      }
+      .lights i {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #ff5f57;
+      }
+      .lights i:nth-child(2) {
+        background: #febc2e;
+      }
+      .lights i:nth-child(3) {
+        background: #28c840;
+      }
+      /* Stand-in for React's first commit replacing #root. */
+      .skel {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        display: grid;
+        grid-template-columns: 272px 1fr;
+        background: var(--ds-bg);
+      }
+      .skel aside {
+        display: grid;
+        align-content: start;
+        gap: 14px;
+        padding: 64px 20px;
+        border-right: 1px solid color-mix(in oklab, var(--ds-fg) 10%, transparent);
+        background: color-mix(in oklab, var(--ds-fg) 3%, var(--ds-bg));
+      }
+      .skel aside i {
+        height: 12px;
+        border-radius: 6px;
+        background: color-mix(in oklab, var(--ds-fg) 10%, transparent);
+      }
+      .skel aside i:nth-child(odd) {
+        width: 70%;
+      }
+      .skel main {
+        position: relative;
+      }
+      .skel main::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        bottom: 40px;
+        left: 0;
+        width: 620px;
+        height: 96px;
+        margin: 0 auto;
+        border: 1px solid color-mix(in oklab, var(--ds-fg) 14%, transparent);
+        border-radius: 18px;
+      }
+      .skel-tag {
+        position: absolute;
+        top: 16px;
+        right: 20px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: color-mix(in oklab, var(--ds-fg) 8%, transparent);
+        color: color-mix(in oklab, var(--ds-fg) 70%, transparent);
+        font:
+          13px ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+      }
+      /* Reduced motion: every rendition's base styles ARE its final frame,
+         so switching animations off leaves a static, fully drawn logo. */
+      .reduce .stage *,
+      .reduce .stage *::before,
+      .reduce .stage *::after {
+        animation: none !important;
+      }
+
+      /* ================================================================
+         01 · Signature
+         ================================================================ */
+      .sig {
+        width: 264px;
+      }
+      .sig-ink {
+        stroke: var(--ds-accent);
+        stroke-width: 2.6;
+        stroke-linejoin: round;
+        stroke-dasharray: 1 1;
+        fill-opacity: 1;
+        stroke-opacity: 0;
+        animation:
+          sig-draw 760ms cubic-bezier(0.65, 0, 0.35, 1) both,
+          sig-flood 440ms ease-out 620ms both;
+      }
+      .sig-ink.s {
+        animation-delay: 110ms, 720ms;
+      }
+      @keyframes sig-draw {
+        from {
+          stroke-dashoffset: 1;
+        }
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      @keyframes sig-flood {
+        from {
+          fill-opacity: 0;
+          stroke-opacity: 1;
+        }
+      }
+      .sig-pro {
+        opacity: 0.62;
+        animation: sig-pro 540ms cubic-bezier(0.2, 0.8, 0.2, 1) 840ms both;
+      }
+      @keyframes sig-pro {
+        from {
+          opacity: 0;
+          transform: translateX(-3px);
+        }
+      }
+      .sig-glint {
+        fill: none;
+        stroke: var(--ds-accent);
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-dasharray: 0.07 0.93;
+        opacity: 0;
+        animation:
+          sig-glint-in 500ms ease 1.25s both,
+          sig-glint 2.6s linear 1.25s infinite;
+      }
+      .sig-glint.s {
+        animation-duration: 500ms, 3.3s;
+      }
+      @keyframes sig-glint-in {
+        to {
+          opacity: 0.9;
+        }
+      }
+      @keyframes sig-glint {
+        from {
+          stroke-dashoffset: 0;
+        }
+        to {
+          stroke-dashoffset: -1;
+        }
+      }
+
+      /* ================================================================
+         02 · Liquid Glass
+         ================================================================ */
+      .glass {
+        position: relative;
+        display: grid;
+        justify-items: center;
+      }
+      .glass-float {
+        animation: glass-float 5s ease-in-out 1.2s infinite;
+      }
+      @keyframes glass-float {
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+      .glass-tile {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 124px;
+        height: 124px;
+        overflow: hidden;
+        border-radius: 28px;
+        background: linear-gradient(
+          180deg,
+          color-mix(in oklab, var(--ds-fg) 14%, var(--ds-bg)),
+          color-mix(in oklab, var(--ds-fg) 4%, var(--ds-bg))
+        );
+        box-shadow:
+          inset 0 0 0 1px color-mix(in oklab, var(--ds-fg) 13%, transparent),
+          inset 0 1px 0 rgb(255 255 255 / 0.22),
+          0 26px 50px -18px rgb(0 0 0 / 0.55),
+          0 2px 6px rgb(0 0 0 / 0.22);
+        animation: glass-in 780ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+      }
+      @keyframes glass-in {
+        0% {
+          opacity: 0;
+          transform: translateY(18px) scale(0.84);
+          filter: blur(12px);
+        }
+        60% {
+          opacity: 1;
+          transform: translateY(-2px) scale(1.015);
+          filter: blur(0);
+        }
+        100% {
+          opacity: 1;
+          transform: none;
+          filter: none;
+        }
+      }
+      .glass-tile::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background: radial-gradient(
+          120% 70% at 28% 0%,
+          rgb(255 255 255 / 0.2),
+          transparent 60%
+        );
+      }
+      .glass-tile::after {
+        content: "";
+        position: absolute;
+        inset: -20%;
+        background: linear-gradient(
+          105deg,
+          transparent 38%,
+          rgb(255 255 255 / 0.22) 50%,
+          transparent 62%
+        );
+        transform: translateX(-120%);
+        animation: glass-sheen 3.2s cubic-bezier(0.45, 0, 0.2, 1) 560ms infinite both;
+      }
+      @keyframes glass-sheen {
+        0% {
+          transform: translateX(-120%);
+        }
+        32%,
+        100% {
+          transform: translateX(120%);
+        }
+      }
+      .glass-mark {
+        position: relative;
+        width: 78px;
+        animation: glass-mark 640ms cubic-bezier(0.2, 0.9, 0.3, 1) 160ms both;
+      }
+      @keyframes glass-mark {
+        from {
+          opacity: 0;
+          transform: translateY(8px) scale(0.94);
+        }
+      }
+      .glass-shine {
+        transform: translateX(0);
+        animation: glass-shine 3.2s cubic-bezier(0.45, 0, 0.2, 1) 560ms infinite both;
+      }
+      @keyframes glass-shine {
+        0% {
+          transform: translateX(0);
+        }
+        32%,
+        100% {
+          transform: translateX(175px);
+        }
+      }
+      .glass-floor {
+        position: absolute;
+        top: calc(100% + 16px);
+        left: 50%;
+        width: 176px;
+        height: 22px;
+        margin-left: -88px;
+        border-radius: 50%;
+        background: radial-gradient(
+          closest-side,
+          color-mix(in oklab, var(--ds-accent) 60%, transparent),
+          transparent
+        );
+        filter: blur(5px);
+        opacity: 0.6;
+        animation:
+          glass-floor-in 900ms ease-out 150ms both,
+          glass-floor-breathe 5s ease-in-out 1.2s infinite;
+      }
+      @keyframes glass-floor-in {
+        from {
+          opacity: 0;
+          transform: scaleX(0.4);
+        }
+      }
+      @keyframes glass-floor-breathe {
+        50% {
+          opacity: 0.42;
+          transform: scaleX(0.9);
+        }
+      }
+
+      /* ================================================================
+         03 · Prompt
+         ================================================================ */
+      .prompt {
+        width: 312px;
+      }
+      .p-chev {
+        fill: none;
+        stroke: var(--ds-accent);
+        stroke-width: 2.1;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        animation: p-show 140ms ease-out both;
+      }
+      .p-g {
+        animation: p-show 70ms linear both;
+      }
+      .p-g1 {
+        animation-delay: 430ms;
+      }
+      .p-g2 {
+        animation-delay: 550ms;
+      }
+      .p-g3 {
+        animation-delay: 740ms;
+      }
+      .p-g4 {
+        animation-delay: 830ms;
+      }
+      .p-g5 {
+        animation-delay: 920ms;
+      }
+      @keyframes p-show {
+        from {
+          opacity: 0;
+        }
+      }
+      .p-caret {
+        fill: var(--ds-accent);
+        transform: translateX(88.3px);
+        animation:
+          p-move 920ms step-end both,
+          p-pre 430ms step-end,
+          p-blink 1.1s step-end 1.4s infinite;
+      }
+      /* Caret jumps as each glyph lands: D, S, space, P, r, o. */
+      @keyframes p-move {
+        0% {
+          transform: translateX(0);
+        }
+        46.74% {
+          transform: translateX(19.2px);
+        }
+        59.78% {
+          transform: translateX(36.5px);
+        }
+        71.74% {
+          transform: translateX(44.2px);
+        }
+        80.43% {
+          transform: translateX(61.8px);
+        }
+        90.22% {
+          transform: translateX(72.6px);
+        }
+        100% {
+          transform: translateX(88.3px);
+        }
+      }
+      @keyframes p-pre {
+        0% {
+          opacity: 1;
+        }
+        45% {
+          opacity: 0;
+        }
+        90% {
+          opacity: 1;
+        }
+      }
+      @keyframes p-blink {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* ================================================================
+         04 · Converge
+         ================================================================ */
+      .cv {
+        position: relative;
+      }
+      .cv-mark {
+        position: relative;
+        width: 152px;
+        aspect-ratio: 106 / 66;
+        animation: cv-knock 320ms cubic-bezier(0.3, 0, 0.2, 1) 340ms both;
+      }
+      .cv-mark::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 240px;
+        height: 240px;
+        margin: -120px 0 0 -120px;
+        border-radius: 50%;
+        background: radial-gradient(
+          closest-side,
+          color-mix(in oklab, var(--ds-accent) 60%, transparent),
+          transparent 70%
+        );
+        opacity: 0;
+        animation: cv-flash 720ms ease-out 340ms both;
+      }
+      .cv-mark svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .cv-d {
+        animation: cv-in-l 560ms both;
+      }
+      .cv-s {
+        animation: cv-in-r 560ms both;
+      }
+      /* Accelerate into the collision, then spring back from the overshoot. */
+      @keyframes cv-in-l {
+        0% {
+          opacity: 0;
+          transform: translateX(-96px);
+          filter: blur(10px);
+          animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5);
+        }
+        65% {
+          opacity: 1;
+          transform: translateX(5px);
+          filter: blur(0);
+          animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+        }
+        100% {
+          opacity: 1;
+          transform: none;
+          filter: none;
+        }
+      }
+      @keyframes cv-in-r {
+        0% {
+          opacity: 0;
+          transform: translateX(96px);
+          filter: blur(10px);
+          animation-timing-function: cubic-bezier(0.6, 0, 0.9, 0.5);
+        }
+        65% {
+          opacity: 1;
+          transform: translateX(-5px);
+          filter: blur(0);
+          animation-timing-function: cubic-bezier(0.2, 0.8, 0.3, 1);
+        }
+        100% {
+          opacity: 1;
+          transform: none;
+          filter: none;
+        }
+      }
+      @keyframes cv-knock {
+        0%,
+        100% {
+          transform: none;
+        }
+        30% {
+          transform: scale(1.045);
+        }
+      }
+      @keyframes cv-flash {
+        0% {
+          opacity: 0;
+          transform: scale(0.3);
+        }
+        25% {
+          opacity: 0.9;
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.5);
+        }
+      }
+      .cv-line {
+        position: absolute;
+        top: calc(100% + 26px);
+        left: 50%;
+        width: 152px;
+        height: 2px;
+        margin-left: -76px;
+        overflow: hidden;
+        border-radius: 2px;
+        background: color-mix(in oklab, var(--ds-accent) 32%, transparent);
+        animation: cv-line 540ms cubic-bezier(0.2, 0.8, 0.2, 1) 380ms both;
+      }
+      @keyframes cv-line {
+        from {
+          transform: scaleX(0);
+          background: var(--ds-accent);
+        }
+      }
+      .cv-line::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 40%;
+        background: linear-gradient(90deg, transparent, var(--ds-accent), transparent);
+        transform: translateX(-100%);
+        animation: cv-scan 1.5s cubic-bezier(0.5, 0, 0.5, 1) 950ms infinite both;
+      }
+      @keyframes cv-scan {
+        from {
+          transform: translateX(-100%);
+        }
+        to {
+          transform: translateX(250%);
+        }
+      }
+
+      /* ================================================================
+         05 · Orbit
+         ================================================================ */
+      .orb-stars {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 2px;
+        height: 2px;
+        margin: -1px 0 0 -1px;
+        border-radius: 50%;
+        color: var(--ds-fg);
+      }
+      .orb-stars.a {
+        opacity: 0.5;
+        animation:
+          orb-warp 1.1s cubic-bezier(0.16, 1, 0.3, 1) both,
+          orb-twinkle 3.6s ease-in-out 1.1s infinite;
+      }
+      .orb-stars.b {
+        opacity: 0.32;
+        animation:
+          orb-warp 1.4s cubic-bezier(0.16, 1, 0.3, 1) both,
+          orb-twinkle 4.4s ease-in-out 2.9s infinite;
+      }
+      @keyframes orb-warp {
+        from {
+          opacity: 0;
+          transform: scale(0.15);
+        }
+      }
+      @keyframes orb-twinkle {
+        50% {
+          opacity: 0.12;
+        }
+      }
+      .orb {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 380px;
+        height: 220px;
+      }
+      .orb-mark {
+        position: relative;
+        z-index: 1;
+        width: 136px;
+        animation: orb-arrive 1s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      @keyframes orb-arrive {
+        0% {
+          opacity: 0;
+          transform: scale(1.9);
+          filter: blur(16px);
+        }
+        60% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 1;
+          transform: none;
+          filter: none;
+        }
+      }
+      /* The ring is drawn twice: the upper half sits behind the letters,
+         the lower half in front, so the satellite passes behind the D
+         and across the S. */
+      .orb-layer {
+        position: absolute;
+        inset: 0;
+        transform: rotate(-12deg);
+      }
+      .orb-layer.back {
+        clip-path: inset(-40px -40px 50% -40px);
+      }
+      .orb-layer.front {
+        z-index: 2;
+        clip-path: inset(50% -40px -40px -40px);
+      }
+      .orb-ring {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .orb-ring path {
+        fill: none;
+        stroke: currentColor;
+        stroke-opacity: 0.2;
+        stroke-width: 1.2;
+        stroke-dasharray: 1 1;
+        animation: orb-ring 1s cubic-bezier(0.65, 0, 0.35, 1) 250ms both;
+      }
+      .orb-ring path.knock {
+        stroke: var(--ds-bg);
+        stroke-opacity: 1;
+        stroke-width: 6;
+      }
+      .orb-layer.front .orb-ring path:not(.knock) {
+        stroke-opacity: 0.4;
+      }
+      @keyframes orb-ring {
+        from {
+          stroke-dashoffset: 1;
+        }
+        to {
+          stroke-dashoffset: 0;
+        }
+      }
+      .orb-dot {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--ds-accent);
+        box-shadow: 0 0 14px 3px color-mix(in oklab, var(--ds-accent) 55%, transparent);
+        offset-path: path("M 14 110 A 176 28 0 1 1 366 110 A 176 28 0 1 1 14 110");
+        offset-rotate: 0deg;
+        offset-anchor: 50% 50%;
+        offset-distance: 62%;
+        animation:
+          orb-dot-in 500ms ease-out 650ms both,
+          orb-go 2.6s linear 650ms infinite both,
+          orb-depth 2.6s ease-in-out 650ms infinite both;
+      }
+      .orb-dot.t1 {
+        width: 7px;
+        height: 7px;
+        opacity: 0.45;
+        box-shadow: none;
+        animation-delay: 700ms, 720ms, 720ms;
+      }
+      .orb-dot.t2 {
+        width: 5px;
+        height: 5px;
+        opacity: 0.22;
+        box-shadow: none;
+        animation-delay: 750ms, 790ms, 790ms;
+      }
+      @keyframes orb-dot-in {
+        from {
+          opacity: 0;
+        }
+      }
+      @keyframes orb-go {
+        from {
+          offset-distance: 0%;
+        }
+        to {
+          offset-distance: 100%;
+        }
+      }
+      /* Smaller at the back of the orbit, larger in front. */
+      @keyframes orb-depth {
+        0%,
+        50%,
+        100% {
+          scale: 1;
+        }
+        25% {
+          scale: 0.7;
+        }
+        75% {
+          scale: 1.3;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>DevSpace Pro · startup animations</h1>
+      <p class="lede">
+        Five boot splashes built from the real DS monogram and DS&nbsp;Pro lockup paths. Each is pure
+        CSS&nbsp;+ inline SVG sized for the <code>#boot-shell</code> in
+        <code>apps/web/index.html</code>, so it starts animating before any JavaScript has loaded.
+      </p>
+    </header>
+
+    <div class="controls">
+      <div class="controls-inner">
+        <div class="group" role="group" aria-label="Theme">
+          <span class="label">Theme</span>
+          <div class="chips" id="themes"></div>
+        </div>
+        <div class="group">
+          <label class="label" for="mount">App mounts at</label>
+          <select id="mount">
+            <option value="0">Never (watch idle loop)</option>
+            <option value="350">350 ms · fast boot</option>
+            <option value="700">700 ms</option>
+            <option value="1200">1.2 s · cold boot</option>
+          </select>
+        </div>
+        <label class="toggle"><input type="checkbox" id="reduce" /> Reduced motion</label>
+        <button class="btn" id="replay-all" type="button">Replay all</button>
+      </div>
+    </div>
+
+    <main class="grid" id="grid"></main>
+
+    <div class="fs" id="fs" hidden>
+      <div class="frame"><div class="stage" id="fs-stage"></div></div>
+      <div class="fs-bar">
+        <button class="btn" id="fs-replay" type="button">Replay</button>
+        <button class="btn" id="fs-close" type="button">Close · Esc</button>
+      </div>
+    </div>
+
+    <script>
+      // ---------- Brand geometry (from assets/dspro) ----------
+      // DS monogram: DevSpacePro.icon/Assets/monogram.svg
+      const D =
+        "M16 36h21c18 0 29 11 29 28S55 92 37 92H16V36Zm13 11v34h8c10 0 16-6 16-17s-6-17-16-17h-8Z";
+      const S =
+        "m112 41-5 10c-5-3-10-5-16-5-6 0-10 2-10 6 0 4 4 5 12 7 13 3 21 7 21 17 0 11-9 18-24 18-9 0-18-3-24-7l5-10c5 4 12 6 19 6 7 0 11-2 11-6 0-4-4-5-12-7-13-3-21-7-21-17 0-11 9-18 23-18 8 0 15 2 21 6Z";
+      // "Pro" outlines: header-logo.svg
+      const P =
+        "M3.592 13.919L3.592 11.164L9.003 11.164Q11.139 11.164 12.316 10.060Q13.492 8.956 13.492 6.981L13.492 6.951Q13.492 4.961 12.316 3.866Q11.139 2.771 9.003 2.771L3.592 2.771L3.592 0.000L9.825 0.000Q11.905 0.000 13.481 0.868Q15.057 1.737 15.950 3.298Q16.843 4.859 16.843 6.928L16.843 6.957Q16.843 9.025 15.950 10.596Q15.057 12.166 13.481 13.042Q11.905 13.919 9.825 13.919ZM1.943 21.138L1.943 0.000L5.235 0.000L5.235 21.138Z";
+      const R =
+        "M19.721 21.138L19.721 5.731L22.904 5.731L22.904 8.369L22.973 8.369Q23.340 7.002 24.274 6.215Q25.207 5.428 26.526 5.428Q26.871 5.428 27.159 5.468Q27.448 5.509 27.629 5.555L27.629 8.503Q27.440 8.425 27.053 8.373Q26.666 8.321 26.197 8.321Q25.189 8.321 24.445 8.750Q23.701 9.179 23.303 9.993Q22.904 10.807 22.904 11.959L22.904 21.138Z";
+      const O =
+        "M35.959 21.441Q33.750 21.441 32.103 20.471Q30.456 19.500 29.545 17.701Q28.635 15.902 28.635 13.437L28.635 13.408Q28.635 10.939 29.551 9.151Q30.467 7.363 32.114 6.395Q33.761 5.428 35.947 5.428Q38.147 5.428 39.794 6.394Q41.442 7.360 42.357 9.147Q43.273 10.933 43.273 13.408L43.273 13.437Q43.273 15.917 42.361 17.710Q41.450 19.502 39.809 20.472Q38.167 21.441 35.959 21.441ZM35.973 18.783Q37.211 18.783 38.118 18.154Q39.025 17.525 39.526 16.328Q40.026 15.130 40.026 13.437L40.026 13.408Q40.026 11.718 39.523 10.526Q39.019 9.335 38.100 8.711Q37.181 8.086 35.947 8.086Q34.736 8.086 33.817 8.717Q32.898 9.347 32.390 10.532Q31.881 11.718 31.881 13.408L31.881 13.437Q31.881 15.130 32.388 16.328Q32.895 17.525 33.814 18.154Q34.733 18.783 35.973 18.783Z";
+      const DS_IN_LOCKUP = "scale(0.3582660222457627) translate(-16 -35)";
+      const PRO_X = 43.68149875151332;
+      const MONO_VB = "12 31 106 66";
+      const ORBIT = "M 14 110 A 176 28 0 1 1 366 110 A 176 28 0 1 1 14 110";
+
+      // ---------- Themes: the boot palettes from apps/web/index.html ----------
+      const THEMES = [
+        ["dark", "Default dark", "#0a0a0a", "#f5f5f5", "#818cf8"],
+        ["light", "Default light", "#ffffff", "#262626", "#4f46e5"],
+        [
+          "iris",
+          "Iris",
+          "oklch(0.225975 0.031062 293.741)",
+          "oklch(0.990339 0.008411 325.64)",
+          "oklch(0.671712 0.169136 293.929)",
+        ],
+        [
+          "ocean",
+          "Ocean",
+          "oklch(0.242641 0.024125 250.573)",
+          "oklch(0.990339 0.008411 325.64)",
+          "oklch(0.758933 0.105833 241.548)",
+        ],
+        [
+          "ember",
+          "Ember",
+          "oklch(0.245899 0.019144 42.044)",
+          "oklch(0.990339 0.008411 325.64)",
+          "oklch(0.762174 0.124117 52.082)",
+        ],
+        [
+          "grove",
+          "Grove",
+          "oklch(0.260865 0.02152 162.75)",
+          "oklch(0.990339 0.008411 325.64)",
+          "oklch(0.796228 0.133058 157.319)",
+        ],
+        [
+          "t3-chat",
+          "T3 Chat",
+          "oklch(0.22813 0.020366 307.469)",
+          "oklch(0.980735 0.004092 301.426)",
+          "oklch(0.460685 0.185347 4.099)",
+        ],
+      ];
+
+      // ---------- Deterministic starfield for Orbit ----------
+      function starField(seed, count) {
+        let state = seed >>> 0;
+        const rand = () => {
+          state = (state + 0x6d2b79f5) >>> 0;
+          let t = state;
+          t = Math.imul(t ^ (t >>> 15), t | 1);
+          t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+        const stars = [];
+        while (stars.length < count) {
+          const x = (rand() * 2 - 1) * 660;
+          const y = (rand() * 2 - 1) * 420;
+          if ((x / 270) ** 2 + (y / 160) ** 2 < 1) continue; // keep the mark clear
+          const r = rand();
+          const spread = r > 0.93 ? 1 : r > 0.7 ? 0.5 : 0;
+          stars.push(`${x.toFixed(0)}px ${y.toFixed(0)}px 0 ${spread}px`);
+        }
+        return stars.join(",");
+      }
+      const STARS_A = starField(7, 42);
+      const STARS_B = starField(19, 36);
+
+      // ---------- The five renditions ----------
+      const orbitLayer = (side) => `
+        <div class="orb-layer ${side}">
+          <svg class="orb-ring" viewBox="0 0 380 220">${side === "front" ? `<path class="knock" pathLength="1" d="${ORBIT}"/>` : ""}<path pathLength="1" d="${ORBIT}"/></svg>
+          <i class="orb-dot t2"></i><i class="orb-dot t1"></i><i class="orb-dot"></i>
+        </div>`;
+
+      const RENDITIONS = [
+        {
+          id: "signature",
+          name: "Signature",
+          desc: "An accent pen traces the DS outline, ink floods in, then “Pro” settles beside it. A short glint keeps circling the letters while the app loads.",
+          meta: "legible ≈0.5s · intro 1.4s · idle: glint traces the letters",
+          html: () => `
+            <svg class="sig" viewBox="-2 -2 92.2 26.2" role="img" aria-label="DevSpace Pro">
+              <g transform="${DS_IN_LOCKUP}">
+                <path class="sig-ink" pathLength="1" fill-rule="evenodd" d="${D}"/>
+                <path class="sig-ink s" pathLength="1" d="${S}"/>
+                <path class="sig-glint" pathLength="1" d="${D}"/>
+                <path class="sig-glint s" pathLength="1" d="${S}"/>
+              </g>
+              <g transform="translate(${PRO_X} 0)">
+                <g class="sig-pro"><path d="${P}"/><path d="${R}"/><path d="${O}"/></g>
+              </g>
+            </svg>`,
+        },
+        {
+          id: "glass",
+          name: "Liquid Glass",
+          desc: "Echoes the Icon Composer icon: the glass tile rises out of a blur, and a specular highlight sweeps across the tile and the letters every few seconds.",
+          meta: "legible ≈0.4s · intro 0.8s · idle: specular sweep + float",
+          html: (u) => `
+            <div class="glass" role="img" aria-label="DevSpace Pro">
+              <div class="glass-float">
+                <div class="glass-tile">
+                  <svg class="glass-mark" viewBox="${MONO_VB}" aria-hidden="true">
+                    <defs>
+                      <clipPath id="gc${u}"><path clip-rule="evenodd" d="${D}"/><path d="${S}"/></clipPath>
+                      <linearGradient id="gi${u}" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="currentColor"/>
+                        <stop offset="1" stop-color="currentColor" stop-opacity=".66"/>
+                      </linearGradient>
+                      <linearGradient id="gs${u}" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+                        <stop offset=".5" stop-color="#fff" stop-opacity=".85"/>
+                        <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <g clip-path="url(#gc${u})">
+                      <rect x="12" y="31" width="106" height="66" fill="url(#gi${u})"/>
+                      <g class="glass-shine"><rect x="-24" y="20" width="34" height="90" fill="url(#gs${u})" transform="skewX(-18)"/></g>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+              <div class="glass-floor"></div>
+            </div>`,
+        },
+        {
+          id: "prompt",
+          name: "Prompt",
+          desc: "Terminal-native: a caret blinks after a prompt chevron, types D S · P r o, and keeps blinking until the app paints.",
+          meta: "legible ≈0.55s · intro 0.9s · idle: blinking caret",
+          html: () => `
+            <svg class="prompt" viewBox="-14 -3 107 27" role="img" aria-label="DevSpace Pro">
+              <path class="p-chev" d="M-12 4.5 -6 10.6 -12 16.7"/>
+              <g transform="${DS_IN_LOCKUP}">
+                <path class="p-g p-g1" fill-rule="evenodd" d="${D}"/>
+                <path class="p-g p-g2" d="${S}"/>
+              </g>
+              <g transform="translate(${PRO_X} 0)" opacity=".62">
+                <path class="p-g p-g3" d="${P}"/><path class="p-g p-g4" d="${R}"/><path class="p-g p-g5" d="${O}"/>
+              </g>
+              <rect class="p-caret" x="0" y="-.6" width="2.8" height="22.4" rx=".4"/>
+            </svg>`,
+        },
+        {
+          id: "converge",
+          name: "Converge",
+          desc: "D and S rush in from opposite sides with motion blur, collide in a soft accent flash, and an underline keeps scanning like a progress bar.",
+          meta: "legible ≈0.4s · intro 0.95s · idle: scanning underline",
+          html: () => `
+            <div class="cv" role="img" aria-label="DevSpace Pro">
+              <div class="cv-mark">
+                <svg class="cv-d" viewBox="${MONO_VB}" aria-hidden="true"><path fill-rule="evenodd" d="${D}"/></svg>
+                <svg class="cv-s" viewBox="${MONO_VB}" aria-hidden="true"><path d="${S}"/></svg>
+              </div>
+              <div class="cv-line"></div>
+            </div>`,
+        },
+        {
+          id: "orbit",
+          name: "Orbit",
+          desc: "The monogram drops out of a star warp while an accent satellite orbits on a tilted ring, passing behind the D and in front of the S.",
+          meta: "legible ≈0.5s · intro 1.2s · idle: continuous orbit",
+          html: () => `
+            <div class="orb-stars a" style="box-shadow:${STARS_A}"></div>
+            <div class="orb-stars b" style="box-shadow:${STARS_B}"></div>
+            <div class="orb" role="img" aria-label="DevSpace Pro">
+              ${orbitLayer("back")}
+              <svg class="orb-mark" viewBox="${MONO_VB}" aria-hidden="true">
+                <path fill-rule="evenodd" d="${D}"/><path d="${S}"/>
+              </svg>
+              ${orbitLayer("front")}
+            </div>`,
+        },
+      ];
+      const byId = Object.fromEntries(RENDITIONS.map((r) => [r.id, r]));
+
+      // ---------- Playback ----------
+      const mountSelect = document.getElementById("mount");
+      const reduceToggle = document.getElementById("reduce");
+      const LIGHTS = '<div class="lights" aria-hidden="true"><i></i><i></i><i></i></div>';
+      let uid = 0;
+
+      function play(stage) {
+        clearTimeout(stage._mountTimer);
+        stage.innerHTML = LIGHTS + byId[stage.dataset.id].html(++uid);
+        const at = Number(mountSelect.value);
+        if (at > 0) {
+          stage._mountTimer = setTimeout(() => {
+            stage.insertAdjacentHTML(
+              "beforeend",
+              `<div class="skel" aria-hidden="true"><aside>${"<i></i>".repeat(9)}</aside><main></main><span class="skel-tag">React mounted @ ${at}ms</span></div>`,
+            );
+          }, at);
+        }
+      }
+      const cardStages = () => document.querySelectorAll("#grid .stage");
+      const replayAll = () => cardStages().forEach(play);
+
+      // ---------- Build cards ----------
+      const grid = document.getElementById("grid");
+      grid.innerHTML =
+        RENDITIONS.map(
+          (r, i) => `
+          <article class="card">
+            <div class="frame"><div class="stage" data-id="${r.id}"></div></div>
+            <div class="card-body">
+              <div class="card-head">
+                <h2><span class="num">0${i + 1}</span>${r.name}</h2>
+                <div class="actions">
+                  <button class="btn" type="button" data-replay="${r.id}">Replay</button>
+                  <button class="btn" type="button" data-full="${r.id}">Full window</button>
+                </div>
+              </div>
+              <p>${r.desc}</p>
+              <div class="meta">${r.meta}</div>
+            </div>
+          </article>`,
+        ).join("") +
+        `
+          <article class="card info">
+            <h2>How these ship</h2>
+            <ul>
+              <li><strong>No JS.</strong> Each one swaps the <code>&lt;img&gt;</code> inside <code>#boot-shell</code> for ~3&nbsp;KB of CSS and inline SVG, so it animates while the bundle is still downloading.</li>
+              <li><strong>Theme-aware.</strong> Colours come from the <code>--boot-*</code> variables the boot script already sets, so each theme gets its own splash. Use the theme chips to check.</li>
+              <li><strong>Cut-off safe.</strong> React's first commit replaces <code>#root</code> whenever it's ready. Every intro makes the logo legible within about half a second, then idles, so a fast boot never cuts it mid-stroke. Try “App mounts at”.</li>
+              <li><strong>Reduced motion</strong> shows the finished logo with no animation.</li>
+            </ul>
+          </article>`;
+
+      grid.addEventListener("click", (event) => {
+        const replay = event.target.closest("[data-replay]");
+        if (replay) play(replay.closest(".card").querySelector(".stage"));
+        const full = event.target.closest("[data-full]");
+        if (full) openFull(full.dataset.full);
+      });
+
+      const scaleObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          const stage = entry.target.querySelector(".stage");
+          stage.style.setProperty("--s", entry.contentRect.width / 1280);
+        }
+      });
+      document.querySelectorAll("#grid .frame").forEach((frame) => scaleObserver.observe(frame));
+
+      // ---------- Full window ----------
+      const fs = document.getElementById("fs");
+      const fsStage = document.getElementById("fs-stage");
+      function openFull(id) {
+        fsStage.dataset.id = id;
+        fs.hidden = false;
+        play(fsStage);
+        document.getElementById("fs-close").focus();
+      }
+      function closeFull() {
+        clearTimeout(fsStage._mountTimer);
+        fs.hidden = true;
+        fsStage.innerHTML = "";
+      }
+      document.getElementById("fs-close").addEventListener("click", closeFull);
+      document.getElementById("fs-replay").addEventListener("click", () => play(fsStage));
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !fs.hidden) closeFull();
+      });
+
+      // ---------- Controls ----------
+      const themeChips = document.getElementById("themes");
+      themeChips.innerHTML = THEMES.map(
+        ([id, label, bg, , accent]) =>
+          `<button class="chip" type="button" data-theme="${id}" aria-pressed="false"><span class="sw" style="--sw-bg:${bg};--sw-accent:${accent}"></span>${label}</button>`,
+      ).join("");
+      function setTheme(id) {
+        const [, , bg, fg, accent] = THEMES.find((t) => t[0] === id);
+        document.body.style.setProperty("--ds-bg", bg);
+        document.body.style.setProperty("--ds-fg", fg);
+        document.body.style.setProperty("--ds-accent", accent);
+        themeChips.querySelectorAll(".chip").forEach((chip) => {
+          chip.setAttribute("aria-pressed", String(chip.dataset.theme === id));
+        });
+      }
+      themeChips.addEventListener("click", (event) => {
+        const chip = event.target.closest("[data-theme]");
+        if (chip) setTheme(chip.dataset.theme);
+      });
+
+      reduceToggle.checked = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      document.body.classList.toggle("reduce", reduceToggle.checked);
+      reduceToggle.addEventListener("change", () => {
+        document.body.classList.toggle("reduce", reduceToggle.checked);
+        replayAll();
+      });
+      mountSelect.addEventListener("change", replayAll);
+      document.getElementById("replay-all").addEventListener("click", replayAll);
+
+      setTheme("dark");
+      replayAll();
+    </script>
+  </body>
+</html>

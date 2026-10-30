@@ -1,0 +1,61 @@
+{
+  "fill-specializations": [
+    {
+      "value": "system-light"
+    },
+    {
+      "appearance": "dark",
+      "value": "system-dark"
+    },
+    {
+      "appearance": "tinted",
+      "value": "automatic"
+    }
+  ],
+  "groups": [
+    {
+      "layers": [
+        {
+          "image-name": "monogram.svg",
+          "name": "DS monogram",
+          "glass": true,
+          "position": {
+            "scale": 8.0,
+            "translation-in-points": [0, 0]
+          },
+          "fill-specializations": [
+            {
+              "value": {
+                "solid": "srgb:0.12000,0.14000,0.18000,1.00000"
+              }
+            },
+            {
+              "appearance": "dark",
+              "value": {
+                "solid": "srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            },
+            {
+              "appearance": "tinted",
+              "value": {
+                "solid": "srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            }
+          ]
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.5
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.5
+      },
+      "specular": true
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}

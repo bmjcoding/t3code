@@ -258,15 +258,15 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
     assert.equal(resolveDesktopProductName("0.0.17-nightly.20260413.42"), "T3 Code (Nightly)");
   });
 
-  it("switches desktop packaging icons to the nightly artwork for nightly versions", () => {
+  it("keeps the DS macOS icon across release channels", () => {
     assert.deepStrictEqual(resolveDesktopBuildIconAssets("0.0.17"), {
-      macIconPng: BRAND_ASSET_PATHS.productionMacIconPng,
+      macIconPng: BRAND_ASSET_PATHS.devSpaceMacIconPng,
       linuxIconPng: BRAND_ASSET_PATHS.productionLinuxIconPng,
       windowsIconIco: BRAND_ASSET_PATHS.productionWindowsIconIco,
     });
 
     assert.deepStrictEqual(resolveDesktopBuildIconAssets("0.0.17-nightly.20260413.42"), {
-      macIconPng: BRAND_ASSET_PATHS.nightlyMacIconPng,
+      macIconPng: BRAND_ASSET_PATHS.devSpaceMacIconPng,
       linuxIconPng: BRAND_ASSET_PATHS.nightlyLinuxIconPng,
       windowsIconIco: BRAND_ASSET_PATHS.nightlyWindowsIconIco,
     });
@@ -658,6 +658,7 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
         "**/*.map",
       ]);
       assert.deepStrictEqual(mac.dmg, {
+        icon: "icon.icns",
         title: "T3 Code (Alpha) 1.2.3 Installer",
         background: "dmg/dmg-background-latest.png",
         window: { width: 640, height: 432 },
@@ -933,7 +934,8 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
             };
             const fails =
               childProcess.command === "rustc" ||
-              (childProcess.command === "xcrun" && childProcess.args.includes("iconutil"));
+              (childProcess.command === "xcrun" &&
+                (childProcess.args.includes("iconutil") || childProcess.args.includes("actool")));
             return Effect.succeed(mockProcess(fails ? 1 : 0));
           }),
         );
@@ -943,9 +945,10 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
         );
 
         assert.instanceOf(error, MacDesktopBuildPrerequisitesMissingError);
-        assert.deepStrictEqual(error.missing, ["rust", "iconutil"]);
+        assert.deepStrictEqual(error.missing, ["rust", "iconutil", "actool"]);
         assert.deepStrictEqual(error.rustTargets, ["aarch64-apple-darwin", "x86_64-apple-darwin"]);
         assert.include(error.message, "xcode-select --install");
+        assert.include(error.message, "full Xcode 26+");
         assert.include(error.message, "rustup target add aarch64-apple-darwin x86_64-apple-darwin");
       }),
     ),
@@ -1872,6 +1875,8 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
 
       const mac = config.mac as Record<string, unknown>;
       assert.equal(config.appId, "com.t3tools.t3code");
+      assert.match(String(mac.icon), /assets[\\/]dspro[\\/]DevSpacePro\.icon$/);
+      assert.equal((config.dmg as Record<string, unknown>).icon, "icon.icns");
       assert.equal(mac.entitlements, "/tmp/entitlements.mac.plist");
       assert.equal(mac.provisioningProfile, "/tmp/t3code.provisionprofile");
       assert.match(String(mac.sign), /[\\/]scripts[\\/]sign-macos\.ts$/);
